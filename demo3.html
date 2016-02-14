@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Demo 3 - Two hands clap</title>
+
+<meta name="renderer" content="webkit" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<script src="http://js.leapmotion.com/leap-0.6.3.js"></script>
+<script src="http://js.leapmotion.com/leap-plugins-0.1.8.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+
+<style>
+img {
+  z-index: -1;
+}
+#click-map {
+  position: absolute;
+  width: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.circle {
+  z-index: 1;
+  opacity: .8;
+  display: inline-block;
+  width: 70px;
+  height: 70px;
+  background-color: #000;
+  border-radius: 50%;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+.circle:hover {
+  background-color: #fff;
+  border: 4px solid #000;
+}
+</style>
+
+<script type="text/javascript">
+
+$(document).ready(function() { 
+  $('.circle').on('click', function(e) {
+    $(e.target).css("background-color", "#ff0000");
+  });
+});
+
+var cursors = {};
+
+var flag = false;
+Leap.loop({enableGestures: true}, function(frame) {
+
+  frame.hands.forEach(function(hand, index) {
+    var cursor = ( cursors[index] || (cursors[index] = new Cursor()) );    
+    cursor.setTransform(hand.screenPosition(), hand.roll());
+    if (index >= 1) {
+      if (!flag && Math.abs(cursors[0].getX() - cursors[1].getX()) < 80 && Math.abs(cursors[0].getY() - cursors[1].getY()) < 80) {
+        flag = true;
+        simulateClick(Math.abs(cursors[0].getX() + cursors[1].getX())/2, Math.abs(cursors[0].getY() + cursors[1].getY())/2);
+      } else {
+        flag = false;
+      }
+    }
+  });
+  
+}).use('screenPosition', {scale: 0.25});
+
+var Cursor = function() {
+  var cursor = this;
+  var img = document.createElement('img');
+  var x = -1;
+  var y = -1;
+
+  img.src = 'cursor.png';
+  img.style.position = 'absolute';
+  img.onload = function () {
+    cursor.setTransform([window.innerWidth/2,window.innerHeight/2], 0);
+    document.body.appendChild(img);
+  }
+
+  cursor.getX = function() {
+    return this.x;
+  }
+
+  cursor.getY = function() {
+    return this.y;
+  }
+
+  cursor.setTransform = function(position, rotation) {
+    this.x = position[0];
+    this.y = position[1];
+    img.style.left = position[0] - img.width/2 + 'px';
+    img.style.top  = position[1] - img.height/2 + 'px';
+
+    // img.style.transform = 'rotate(' + -rotation + 'rad)';
+    
+    img.style.webkitTransform = img.style.MozTransform = img.style.msTransform =
+    img.style.OTransform = img.style.transform;
+  };
+
+};
+
+function simulateClick(x,y){
+  var ev = document.createEvent("MouseEvent");
+  var el = document.elementFromPoint(x,y);
+  ev.initMouseEvent(
+      "click",
+      true /* bubble */, true /* cancelable */,
+      window, null,
+      x, y, x, y, /* coordinates */
+      false, false, false, false, /* modifier keys */
+      0 /*left*/, null
+  );
+  el.dispatchEvent(ev);
+}
+
+cursors[0] = new Cursor();
+
+Leap.loopController.setBackground(true);
+
+</script>
+
+</head>
+
+
+<body>
+
+<div id="click-map">
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+</div>
+
+
+</body>
+</html>
