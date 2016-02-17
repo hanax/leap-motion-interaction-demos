@@ -12,8 +12,55 @@
 <script type="text/javascript" src="js/jquery.min.js"></script>
 
 <style>
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: #2A2A2A;
+}
 img {
   z-index: -1;
+}
+#progress-bar {
+  z-index: -2;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: rgba(0,0,0,.04);
+  width: 0%;
+  height: 100%;
+  transition: .3s all;
+}
+#log {
+  background-color: rgba(0,0,0,.06);
+  margin-left: 20px;
+  margin-top: 20px;
+  width: 300px;
+  padding: 10px 20px;
+  line-height: 25px;
+}
+#log span {
+  display: inline-block;
+  padding: 0 8px;
+  border-radius: 3px;
+  color: #fff;
+  background-color: #539A5A;
+}
+#timer {
+  text-align: center;
+  font-size: 10px;
+  line-height: 15px;
+  width: 40px;
+  padding: 5px 5px;
+  border: 1px solid #2A2A2A;
+  border-radius: 3px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+#hit-data {
+  font-size: 10px;
+  width: 80px;
+  padding-left: 10px;
+  line-height: 15px;
+  border-left: 2px solid #539A5A;
 }
 .circle {
   z-index: 1;
@@ -25,7 +72,7 @@ img {
   border-radius: 50%;
 }
 #hit-data {
-  color: #00ff00;
+  color: #539A5A;
 }
 </style>
 
@@ -68,7 +115,8 @@ $(document).ready(function() {
   $('.circle').on('click', function(e) {
     if (timerStarted && $(e.target).css("background-color") === "rgb(0, 0, 0)") {
       cnt --;
-      $(e.target).css("background-color", "#ff0000");
+      $('#progress-bar').css('width', (elems.length - cnt)/elems.length * $( window ).width());
+      $(e.target).css("background-color", "#539A5A");
       $('#hit-data').append('hit: ');
       $('#hit-data').append((new Date().getTime() - startTime)/1000);
       $('#hit-data').append('<br />');
@@ -156,6 +204,8 @@ Leap.loopController.setBackground(true);
 
 <body>
 
+<div id="progress-bar"> </div>
+
 <div id="click-map">
   <div class="circle"> </div>
   <div class="circle"> </div>
@@ -172,12 +222,11 @@ Leap.loopController.setBackground(true);
 </div>
 
 <div id="log">
-  Use one hand and rotate your hand 90deg clockwise to hit the circle <br />
-  Hit S to start
-  <div id="timer"> </div>
+  Use two hands and clap to hit the circle <br />
+  Hit <span>S</span> to start
+  <div id="timer"> 0 </div>
   <div id="hit-data"> </div>
 </div>
-
 
 </body>
 </html>
