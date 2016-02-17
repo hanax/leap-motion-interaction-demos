@@ -1,3 +1,4 @@
 # Leap motion interaction techniques demos
 * Course project for INFO5307 Future Interaction Techniques
+* [Demo: rotate hand](http://hanax.github.io/leap_motion_interaction_demos/demo1)
 * [Demo: clap hand](http://hanax.github.io/leap_motion_interaction_demos/demo3)
