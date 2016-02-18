@@ -57,12 +57,16 @@ img {
 }
 #hit-data {
   font-size: 10px;
-  width: 80px;
+  width: 100%;
   padding-left: 10px;
   line-height: 15px;
   border-left: 2px solid #539A5A;
+  color: #539A5A;
 }
 .circle {
+  position: absolute;
+  text-align: center;
+  color: #fff;
   z-index: 1;
   opacity: .8;
   display: inline-block;
@@ -71,8 +75,18 @@ img {
   background-color: #000;
   border-radius: 50%;
 }
-#hit-data {
-  color: #539A5A;
+.circle .cue {
+  line-height: 50px;
+}
+.cursor {
+  z-index: -1;
+  position: absolute;
+  top: -50px;
+  left: -50px;
+  width: 50px;
+  height: 50px;
+  border: 2px solid #2A2A2A;
+  border-radius: 50%;
 }
 </style>
 
@@ -84,14 +98,19 @@ $(document).ready(function() {
   var cnt = elems.length;
 
   var increase = Math.PI * 2 / elems.length;
-  var x = 0, y = 0, angle = 0;
+  var angle = 0, idx = -1;
   for (var i = 0; i < elems.length; i++) {
     elem = elems[i];
-    x = 200 * Math.cos(angle) + 600;
-    y = 200 * Math.sin(angle) + 300;
-    elem.style.position = 'absolute';
-    elem.style.left = x + 'px';
-    elem.style.top = y + 'px';
+
+    if (i < 6) {
+      idx = 2 * i + 1;
+    } else {
+      idx = 2 * (i - 5);
+    }
+    $(elem).append('<div class=\'cue\'>' + idx + '</div>');
+
+    $(elem).css('left', 150 * Math.cos(angle) + 700);
+    $(elem).css('top', 150 * Math.sin(angle) + 300);
     angle += increase;
   }
 
@@ -112,21 +131,33 @@ $(document).ready(function() {
     }
   });
 
-  $('.circle').on('click', function(e) {
-    if (timerStarted && $(e.target).css("background-color") === "rgb(0, 0, 0)") {
-      cnt --;
-      $('#progress-bar').css('width', (elems.length - cnt)/elems.length * $( window ).width());
-      $(e.target).css("background-color", "#539A5A");
-      $('#hit-data').append('hit: ');
-      $('#hit-data').append((new Date().getTime() - startTime)/1000);
-      $('#hit-data').append('<br />');
+  var old_idx = 0;
+  $('#click-map').on('click', function(e) {
+    if (timerStarted) {
+      if ($(e.target).hasClass('cue')) {
+        var parent_circle = $(e.target).parent();
+        var cur_idx = parseInt($(e.target).text());
+        if (cur_idx - old_idx == 1) {
+          old_idx = cur_idx;
+          $('#progress-bar').css('width', cur_idx/elems.length * $( window ).width());
+          parent_circle.css("background-color", "#539A5A");
+          $('#hit-data')
+            .append('hit ' + cur_idx + ': ')
+            .append((new Date().getTime() - startTime)/1000)
+            .append('<br />');
 
-      if (cnt === 0) {
-        window.clearInterval(intervalID);
-        $('#hit-data').append('yay!');
+          if (cur_idx === elems.length) {
+            window.clearInterval(intervalID);
+            $('#hit-data')
+              .append('Accuracy: ')
+              .append(Math.round((cnt_click - elems.length)/elems.length * 10000) / 100)
+              .append('%');
+          }
+        }
       }
-    } else if (!timerStarted) {
-      window.alert("Please start the timer first! (by hitting S)");
+  
+    } else {
+      window.alert("Please start the timer first! (by hitting s)");
     }
   });
 });
@@ -148,24 +179,18 @@ var flag = false;
 
 var Cursor = function() {
   var cursor = this;
-  var img = document.createElement('img');
-  img.src = 'cursor.png';
-  img.style.position = 'absolute';
-  img.onload = function () {
-    cursor.setTransform([window.innerWidth/2,window.innerHeight/2], 0);
-    document.body.appendChild(img);
-  }
+  var cursor_circle;
+  $(document).ready(function() { 
+    cursor_circle = $('<div class=\'cursor\'></div>').appendTo($('body'));
+  });
 
   cursor.setTransform = function(position, rotation) {
 
-    img.style.left = position[0] - img.width/2 + 'px';
-    img.style.top  = position[1] - img.height/2 + 'px';
+    cursor_circle.css('left', position[0] - 25 + 'px');
+    cursor_circle.css('top', position[1] - 25 + 'px');
 
     // img.style.transform = 'rotate(' + -rotation + 'rad)';
     
-    img.style.webkitTransform = img.style.MozTransform = img.style.msTransform =
-    img.style.OTransform = img.style.transform;
-
     if (!flag && Math.abs(rotation) > 1) {
       flag = true;
       // addCircle(position[0] - img.width/2, position[1] - img.height/2);
@@ -179,7 +204,9 @@ var Cursor = function() {
 
 };
 
+var cnt_click = 0;
 function simulateClick(x,y){
+  cnt_click += 1;
   var ev = document.createEvent("MouseEvent");
   var el = document.elementFromPoint(x,y);
   ev.initMouseEvent(
@@ -223,7 +250,7 @@ Leap.loopController.setBackground(true);
 
 <div id="log">
   Use two hands and clap to hit the circle <br />
-  Hit <span>S</span> to start
+  Hit <span>s</span> to start
   <div id="timer"> 0 </div>
   <div id="hit-data"> </div>
 </div>
