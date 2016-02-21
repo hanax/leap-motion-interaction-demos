@@ -109,8 +109,8 @@ $(document).ready(function() {
     }
     $(elem).append('<div class=\'cue\'>' + idx + '</div>');
 
-    $(elem).css('left', 150 * Math.cos(angle) + 700);
-    $(elem).css('top', 150 * Math.sin(angle) + 300);
+    $(elem).css('left', 150 * Math.cos(angle) + 600);
+    $(elem).css('top', 150 * Math.sin(angle) + 250);
     angle += increase;
   }
 
@@ -150,7 +150,7 @@ $(document).ready(function() {
             window.clearInterval(intervalID);
             $('#hit-data')
               .append('Accuracy: ')
-              .append(Math.round((cnt_click - elems.length)/elems.length * 10000) / 100)
+              .append(Math.round((elems.length/cnt_click) * 10000) / 100)
               .append('%');
           }
         }
