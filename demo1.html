@@ -15,6 +15,8 @@
 body {
   font-family: 'Open Sans', sans-serif;
   color: #2A2A2A;
+  height: 100vh;
+  width: 100vw;
 }
 img {
   z-index: -1;
@@ -70,22 +72,29 @@ img {
   z-index: 1;
   opacity: .8;
   display: inline-block;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   background-color: #000;
   border-radius: 50%;
 }
 .circle .cue {
-  line-height: 50px;
+  line-height: 40px;
 }
 .cursor {
   z-index: -1;
   position: absolute;
   top: -50px;
   left: -50px;
-  width: 50px;
-  height: 50px;
+  width: 10px;
+  height: 10px;
   border: 2px solid #2A2A2A;
+  border-radius: 50%;
+}
+.hit-circle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: #ff0000;
   border-radius: 50%;
 }
 </style>
@@ -102,20 +111,21 @@ $(document).ready(function() {
   for (var i = 0; i < elems.length; i++) {
     elem = elems[i];
 
-    if (i < 6) {
+    if (i < 12) {
       idx = 2 * i + 1;
     } else {
-      idx = 2 * (i - 5);
+      idx = 2 * (i - 11);
     }
     $(elem).append('<div class=\'cue\'>' + idx + '</div>');
 
-    $(elem).css('left', 150 * Math.cos(angle) + 600);
-    $(elem).css('top', 150 * Math.sin(angle) + 250);
+    $(elem).css('left', 200 * Math.cos(angle) + 600);
+    $(elem).css('top', 200 * Math.sin(angle) + 250);
     angle += increase;
   }
 
   // timer
   var startTime = -1;
+  var lastTime = -1;
   var timerStarted = false;
   var intervalID = -1;
 
@@ -123,6 +133,7 @@ $(document).ready(function() {
     if (e.keyCode == 83 /* s */) {
       timerStarted = true;
       startTime = new Date().getTime();
+      lastTime = startTime;
       cnt = elems.length;
 
       intervalID = window.setInterval(function() {
@@ -132,6 +143,11 @@ $(document).ready(function() {
   });
 
   var old_idx = 0;
+
+  $('body').on('click', function(e) {
+    addCircle(e.pageX, e.pageY);
+  });
+
   $('#click-map').on('click', function(e) {
     if (timerStarted) {
       if ($(e.target).hasClass('cue')) {
@@ -143,8 +159,9 @@ $(document).ready(function() {
           parent_circle.css("background-color", "#539A5A");
           $('#hit-data')
             .append('hit ' + cur_idx + ': ')
-            .append((new Date().getTime() - startTime)/1000)
+            .append((new Date().getTime() - lastTime)/1000)
             .append('<br />');
+          lastTime = new Date().getTime();
 
           if (cur_idx === elems.length) {
             window.clearInterval(intervalID);
@@ -193,7 +210,7 @@ var Cursor = function() {
     
     if (!flag && Math.abs(rotation) > 1) {
       flag = true;
-      // addCircle(position[0] - img.width/2, position[1] - img.height/2);
+      addCircle(position[0] - img.width/2, position[1] - img.height/2);
       simulateClick(parseInt(position[0]), parseInt(position[1]));
     } 
     if (Math.abs(rotation) <= 1) {
@@ -204,8 +221,14 @@ var Cursor = function() {
 
 };
 
+function addCircle(x, y) {
+  var hit_circle = $('<div class=\'hit-circle\'></div>').appendTo($('body'));
+  hit_circle.css('left', x);
+  hit_circle.css('top', y);
+}
+
 var cnt_click = 0;
-function simulateClick(x,y){
+function simulateClick(x,y) {
   cnt_click += 1;
   var ev = document.createEvent("MouseEvent");
   var el = document.elementFromPoint(x,y);
@@ -239,9 +262,25 @@ Leap.loopController.setBackground(true);
   <div class="circle"> </div>
   <div class="circle"> </div>
   <div class="circle"> </div>
+
   <div class="circle"> </div>
   <div class="circle"> </div>
   <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+  <div class="circle"> </div>
+
   <div class="circle"> </div>
   <div class="circle"> </div>
   <div class="circle"> </div>
